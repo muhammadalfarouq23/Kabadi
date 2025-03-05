@@ -3,12 +3,11 @@ package com.example.kabadi
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 
 class MainActivity : AppCompatActivity() {
-
-    private var scoreTeamA = 4
-    private var scoreTeamB = 0
 
     private lateinit var tvScoreA: TextView
     private lateinit var tvScoreB: TextView
@@ -18,63 +17,36 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPlus2B: Button
     private lateinit var btnReset: Button
 
+    // Gunakan ViewModel
+    private val scoreViewModel: ScoreViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inisialisasi view
+        // Inisialisasi View
         tvScoreA = findViewById(R.id.tv_score_a)
         tvScoreB = findViewById(R.id.tv_score_b)
         btnPlus1A = findViewById(R.id.btn_plus1_a)
-        btnPlus2A = findViewById(R.id.btn_plus2_b)
+        btnPlus2A = findViewById(R.id.btn_plus2_a)
         btnPlus1B = findViewById(R.id.btn_plus1_b)
         btnPlus2B = findViewById(R.id.btn_plus2_b)
         btnReset = findViewById(R.id.btn_reset)
 
-        // Menampilkan nama pengguna dari LoginActivity (jika ada)
-        val userName = intent.getStringExtra("USER_NAME")
-        if (userName != null) {
-            // Anda bisa menampilkan nama pengguna di TextView lain jika diperlukan
-            // Misalnya: findViewById<TextView>(R.id.tv_welcome).text = "Welcome, $userName!"
-        }
+        // Observasi skor
+        scoreViewModel.scoreTeamA.observe(this, Observer { scoreA ->
+            tvScoreA.text = scoreA.toString()
+        })
 
-        // Set listener untuk tombol-tombol
-        btnPlus1A.setOnClickListener {
-            scoreTeamA += 1
-            updateScore()
-        }
+        scoreViewModel.scoreTeamB.observe(this, Observer { scoreB ->
+            tvScoreB.text = scoreB.toString()
+        })
 
-        btnPlus2A.setOnClickListener {
-            scoreTeamA += 2
-            updateScore()
-        }
-
-        btnPlus1B.setOnClickListener {
-            scoreTeamB += 1
-            updateScore()
-        }
-
-        btnPlus2B.setOnClickListener {
-            scoreTeamB += 2
-            updateScore()
-        }
-
-        btnReset.setOnClickListener {
-            resetScore()
-        }
-
-        // Update tampilan awal
-        updateScore()
-    }
-
-    private fun updateScore() {
-        tvScoreA.text = scoreTeamA.toString()
-        tvScoreB.text = scoreTeamB.toString()
-    }
-
-    private fun resetScore() {
-        scoreTeamA = 0
-        scoreTeamB = 0
-        updateScore()
+        // Set tombol untuk update skor
+        btnPlus1A.setOnClickListener { scoreViewModel.addScoreToTeamA(1) }
+        btnPlus2A.setOnClickListener { scoreViewModel.addScoreToTeamA(2) }
+        btnPlus1B.setOnClickListener { scoreViewModel.addScoreToTeamB(1) }
+        btnPlus2B.setOnClickListener { scoreViewModel.addScoreToTeamB(2) }
+        btnReset.setOnClickListener { scoreViewModel.resetScores() }
     }
 }
